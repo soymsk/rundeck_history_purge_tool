@@ -43,7 +43,7 @@ def purge_history(
         client,
         project,
         job_filter,
-        preserve_history_size,
+        keep_history_size,
         chunk_size,
         max_delete_size,
         dry_run
@@ -52,7 +52,7 @@ def purge_history(
     print("Total: ", total)
     max_delete_size = min(max_delete_size, total)
     deleted = 0
-    remains = total - deleted - preserve_history_size
+    remains = total - deleted - keep_history_size
 
     while remains > 0:
         offset = total - remains
@@ -70,7 +70,7 @@ def purge_history(
         deleted += len(ids)
         time.sleep(0.1)
 
-        remains = total - deleted - preserve_history_size
+        remains = total - deleted - keep_history_size
 
     return deleted
 
@@ -81,7 +81,7 @@ def parse_args():
     parser.add_argument('-t', '--access_token', type=str, default=None, required=True)
     parser.add_argument('-H', '--host', type=str, default='localhost')
     parser.add_argument('-P', '--port', type=int, default=4440)
-    parser.add_argument('-p', '--preserve_history_size', type=int, default=20)
+    parser.add_argument('-k', '--keep_history_size', type=int, default=20)
     parser.add_argument('-m', '--max_delete_size', type=int, default=sys.maxsize)
     parser.add_argument('-c', '--chunk_size', type=int, default=20)
     parser.add_argument('-n', '--dry_run', action='store_true', default=False)
@@ -121,7 +121,7 @@ if __name__ == '__main__':
         Client(args.host, args.port, args.access_token),
         args.project,
         args.job_filter,
-        args.preserve_history_size,
+        args.keep_history_size,
         args.chunk_size,
         args.max_delete_size,
         args.dry_run

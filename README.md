@@ -4,7 +4,7 @@ Rundeck history purge tool with conditions
 # Usage
 ```
 usage: rd_purge_history.py [-h] [-j JOB_FILTER] -t ACCESS_TOKEN [-H HOST]
-                           [-P PORT] [-p PRESERVE_HISTORY_SIZE]
+                           [-P PORT] [-k KEEP_HISTORY_SIZE]
                            [-m MAX_DELETE_SIZE] [-c CHUNK_SIZE] [-n]
                            project
 
@@ -17,7 +17,7 @@ optional arguments:
   -t ACCESS_TOKEN, --access_token ACCESS_TOKEN
   -H HOST, --host HOST
   -P PORT, --port PORT
-  -p PRESERVE_HISTORY_SIZE, --preserve_history_size PRESERVE_HISTORY_SIZE
+  -k KEEP_HISTORY_SIZE, --keep_history_size KEEP_HISTORY_SIZE
   -m MAX_DELETE_SIZE, --max_delete_size MAX_DELETE_SIZE
   -c CHUNK_SIZE, --chunk_size CHUNK_SIZE
   -n, --dry_run
