@@ -26,5 +26,5 @@ optional arguments:
 ## Example usage with cron
 ```
 # The oldest 10 histories of 'job1' in 'main' project are purged everyday.
-5 0 * * * python  /home/ryosuke/workspace/rundeck_history_purge_tool/rd_purge_history.py main -s 10 -j job1 >> ~/cron.log
+5 0 * * * python  /$HOME/rundeck_history_purge_tool/rd_purge_history.py main -s 10 -j job1 >> ~/cron.log
 ```
