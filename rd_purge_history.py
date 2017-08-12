@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 import argparse
+import logging
 import requests
 import sys
 import time
@@ -108,11 +109,20 @@ class Client():
         res.raise_for_status()
         return res
 
+    def delete_executions(self, ids, dry_run=False):
+        logging.info("Purge {} entries: {}".format(len(ids), ids))
+        if not dry_run:
+            res = self.post('executions/delete', data={"ids": ids})
+
+        return len(ids)
+
 
 if __name__ == '__main__':
     args = parse_args()
 
-    print("Args:")
+    logging.basicConfig(level=logging.INFO)
+
+    print("Args: \n")
     print("\n".join([
         "\t{}: {}".format(name, getattr(args, name)) for name in vars(args) if name != 'access_token'
     ]))
@@ -126,5 +136,5 @@ if __name__ == '__main__':
         args.max_delete_size,
         args.dry_run
     )
-    print("Total deleted: ", deleted)
+    logging.info("Total deleted: {}".format(deleted))
 
