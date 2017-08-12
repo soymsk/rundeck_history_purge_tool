@@ -31,10 +31,6 @@ def get_execution_ids(client, project, job_filter, offset, hmax):
     return [event.find('./execution').get('id')  for event in root]
 
 
-def delete_executions(client, ids):
-    res = client.post('executions/delete', data={"ids": ids})
-
-
 def get_history_total(client, project, job_filter):
     history = search_history(client, project, job_filter)
     return int(history.get('total'))
@@ -50,28 +46,30 @@ def purge_history(
         dry_run
 ):
     total = get_history_total(client, project, job_filter)
-    print("Total: ", total)
-    max_delete_size = min(max_delete_size, total)
+    keep_history_size = min(total, keep_history_size)
+    deletions = min(max_delete_size, total - keep_history_size)
+    logging.info("{}/{} histories are going to be deleted..".format(deletions, total))
+
+    chunk_num, remains = divmod(deletions, chunk_size)
+
+    offset  = total
     deleted = 0
-    remains = total - deleted - keep_history_size
-
-    while remains > 0:
-        offset = total - remains
-
+    for i in range(chunk_num):
+        '''
+        Delete by chunk
+        '''
+        offset = total - chunk_size * (i + 1)
         ids = get_execution_ids(client, project, job_filter, offset, chunk_size)
-        delete_size = min(len(ids), max_delete_size - deleted)
-        if delete_size == 0:
-            break
+        ids = ids[-chunk_size:]
 
-        ids = ids[-delete_size:]
-        print("Purge {} entries: {}".format(delete_size, ids))
+        deleted += client.delete_executions(ids, dry_run)
 
-        if not dry_run:
-            delete_executions(client, ids)
-        deleted += len(ids)
         time.sleep(0.1)
 
-        remains = total - deleted - keep_history_size
+    if remains > 0:
+        offset -= remains
+        ids = get_execution_ids(client, project, job_filter, offset, remains)
+        deleted += client.delete_executions(ids, dry_run)
 
     return deleted
 
