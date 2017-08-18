@@ -31,6 +31,6 @@ optional arguments:
 
 ## Example usage with cron for ALL projects, ALL jobs
 ```
-# The oldest 10 histories of all in each project are purged everyday, but keep latest 20 histories
+# The oldest 10 histories of all jobs in each project are purged everyday, but keep latest 20 histories
 5 0 * * * python $PATH_TO_THIS_DIR/rundeck_history_purge_tool/rd_purge_history.py -c 10 -k 20 >> ~/cron.log
 ```
