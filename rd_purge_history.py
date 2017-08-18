@@ -35,6 +35,11 @@ def get_history_total(client, project, job_filter):
     history = search_history(client, project, job_filter)
     return int(history.get('total'))
 
+def get_projects(client):
+    res = client.get("projects")
+    root = etree.fromstring(res.text)
+    projects = [p.text for p in root.iter('name')]
+    return projects
 
 def purge_history(
         client,
@@ -84,7 +89,7 @@ def parse_args():
     parser.add_argument('-m', '--max_delete_size', type=int, default=sys.maxsize)
     parser.add_argument('-c', '--chunk_size', type=int, default=20)
     parser.add_argument('-n', '--dry_run', action='store_true', default=False)
-    parser.add_argument('project', type=str)
+    parser.add_argument('-p,','--project', type=str, default=None)
 
     return parser.parse_args()
 
@@ -118,21 +123,32 @@ class Client():
 if __name__ == '__main__':
     args = parse_args()
 
-    logging.basicConfig(level=logging.INFO)
 
-    print("Args: \n")
-    print("\n".join([
-        "\t{}: {}".format(name, getattr(args, name)) for name in vars(args) if name != 'access_token'
-    ]))
+    if args.project is not None:
+     projects = [ args.project ]
+    else:
+     projects = get_projects(Client(args.host, args.port, args.access_token))
 
-    deleted = purge_history(
-        Client(args.host, args.port, args.access_token),
-        args.project,
-        args.job_filter,
-        args.keep_history_size,
-        args.chunk_size,
-        args.max_delete_size,
-        args.dry_run
-    )
-    logging.info("Total deleted: {}".format(deleted))
+
+    for project in projects:
+     print project
+
+
+     logging.basicConfig(level=logging.ERROR)
+
+     print("Args: \n")
+     print("\n".join([
+         "\t{}: {}".format(name, getattr(args, name)) for name in vars(args) if name != 'access_token'
+     ]))
+
+     deleted = purge_history(
+         Client(args.host, args.port, args.access_token),
+         project,
+         args.job_filter,
+         args.keep_history_size,
+         args.chunk_size,
+         args.max_delete_size,
+           args.dry_run
+     )
+     logging.info("Total deleted: {}".format(deleted))
 
