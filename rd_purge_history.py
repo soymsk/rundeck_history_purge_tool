@@ -7,17 +7,24 @@ import time
 import xml.etree.ElementTree as etree
 
 RUNDECK_HOST = 'http://localhost:4440/api'
-API_VERSION = 18
+API_VERSION = None
 ACCESS_TOKEN = 'OCTQsSsvVFDeH64sFCuNf4XRo0W9OHap'
 
-root = '{host}/{version}'.format(host=RUNDECK_HOST, version=API_VERSION)
+root = None
 
 def search_history(client, project, job_filter=None, offset=0, hmax=0):
-    request = 'history?project={p}&offset={o}&max={m}'.format(
-        p=project,
-        o=offset,
-        m=hmax,
-    )
+    if API_VERSION >= 39:
+        request = 'project/{p}/history?offset={o}&max={m}'.format(
+            p=project,
+            o=offset,
+            m=hmax,
+        )
+    else:
+        request = 'history?project={p}&offset={o}&max={m}'.format(
+            p=project,
+            o=offset,
+            m=hmax,
+        )
 
     if job_filter:
         request += '&jobFilter=' + job_filter
@@ -84,6 +91,7 @@ def parse_args():
     parser.add_argument('-m', '--max_delete_size', type=int, default=sys.maxsize)
     parser.add_argument('-c', '--chunk_size', type=int, default=20)
     parser.add_argument('-n', '--dry_run', action='store_true', default=False)
+    parser.add_argument('--api_version', type=int, default=39, help='API version to use. History endpoint has changed in v39. Use older API Version if you have an old Redmine release.')
     parser.add_argument('project', type=str)
 
     return parser.parse_args()
@@ -124,6 +132,9 @@ if __name__ == '__main__':
     print("\n".join([
         "\t{}: {}".format(name, getattr(args, name)) for name in vars(args) if name != 'access_token'
     ]))
+
+    API_VERSION = args.api_version
+    root = '{host}/{version}'.format(host=RUNDECK_HOST, version=API_VERSION)
 
     deleted = purge_history(
         Client(args.host, args.port, args.access_token),
